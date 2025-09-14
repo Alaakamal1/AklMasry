@@ -1,0 +1,75 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+.main-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 32px;
+}
+.logo-image img {
+  width: 280px;
+  height: 280px;
+}
+.btns {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+.btns button {
+  width: 270px;
+  height: 60px;
+  background-color: #eae2e0;
+  border: 0px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btns button:hover {
+  background-color: #eae2e0b5;
+}
+.btns a {
+  text-decoration: none;
+  color: black;
+  font-family: sans-serif;
+  font-size: x-large;
+  font-weight: bold;
+}
+.links{
+  font-family: sans-serif;
+  font-size: xx-large;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.link-facebook{
+  text-decoration: none;
+  color: black;
+}
+.icons{
+  display: flex;
+  direction: rtl;
+  gap: 5px;
+}
+.facebook-logo{
+  width: 25px;
+  height: 25px;
+}
+
+
+/* لو الشاشة أصغر من 768px (موبايل) */
+@media (max-width: 768px) {
+
+}
+
+
+/* لو الشاشة أصغر من 1024px (تابلت) */
+@media (max-width: 1024px) {
+
+}
+
