@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>لوحة تحكم المطعم</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+<div class="container">
+  <h1>لوحة تحكم المنيو</h1>
+
+  <form id="foodForm" class="form">
+    <label>اسم الأكلة:</label>
+    <input type="text" id="name" required />
+
+    <label>النوع:</label>
+    <select id="category" required>
+      <option value="tawagen">طواجن</option>
+      <option value="hotdrinks">مشروبات ساخنة</option>
+      <option value="colddrinks">مشروبات باردة</option>
+      <option value="breakfast">فطار</option>
+    </select>
+
+    <label>الوصف:</label>
+    <textarea id="description" rows="2" required></textarea>
+
+    <label>السعر:</label>
+    <input type="number" id="price" required />
+
+    <label>الصورة:</label>
+    <input type="file" id="image" accept="image/*" />
+
+    <button type="submit">➕ إضافة / تعديل</button>
+  </form>
+
+  <!-- Dropdown لتصفية الأصناف -->
+  <div class="filter">
+    <label>تصفية حسب النوع:</label>
+    <select id="filterCategory">
+      <option value="all">الكل</option>
+      <option value="tawagen">طواجن</option>
+      <option value="hotdrinks">مشروبات ساخنة</option>
+      <option value="colddrinks">مشروبات باردة</option>
+      <option value="breakfast">فطار</option>
+    </select>
+  </div>
+
+  <!-- القائمة -->
+  <div class="menu" id="menu"></div>
+
+  <!-- زر تسجيل الخروج -->
+  <button id="logoutBtn" class="dashboard-btn">تسجيل الخروج</button>
+</div>
+
+<script src="../js/dashbord.js"></script>
+</body>
+</html>

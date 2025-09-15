@@ -1,75 +1,212 @@
-* {
+/* إعدادات عامة */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9fafb;
   margin: 0;
   padding: 0;
+  text-align: center;
 }
-.main-page {
+
+.container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  gap: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  width: 90%;
+}
+
+/* الشعار */
+.logo img {
+  width: 200px;
+}
+
+/* الأزرار الرئيسية */
+.buttons {
+  display: flex;
   flex-direction: column;
   gap: 15px;
-  margin-top: 32px;
+  width: 100%;
+  max-width: 250px;
 }
-.logo-image img {
-  width: 280px;
-  height: 280px;
-}
-.btns {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  gap: 8px;
-}
-.btns button {
-  width: 270px;
-  height: 60px;
-  background-color: #eae2e0;
-  border: 0px;
+
+.btn {
+  display: block;
+  padding: 12px 0;
+  color: black;
+  font-size: 18px;
+  font-weight: bold;
+  text-decoration: none;
   border-radius: 8px;
-  cursor: pointer;
+  transition: 0.3s;
+  text-align: center;
+  background-color: #EAE2E0;
 }
-.btns button:hover {
-  background-color: #eae2e0b5;
-}
-.btns a {
-  text-decoration: none;
-  color: black;
-  font-family: sans-serif;
-  font-size: x-large;
+
+/* ألوان الأزرار */
+.btn:hover { background-color: #EAE2E0; }
+
+/* السوشيال */
+.social p {
   font-weight: bold;
+  font-size: 22px;
+  margin: 5px 0;
 }
-.links{
-  font-family: sans-serif;
-  font-size: xx-large;
-  font-weight: bold;
+
+.icons {
   display: flex;
-  justify-content: center;
+  gap: 10px;
   align-items: center;
-  flex-direction: column;
+  justify-content: center;
+  direction: rtl;
 }
-.link-facebook{
+
+.icons a {
   text-decoration: none;
+  font-weight: bold;
+  font-size: 16px;
   color: black;
 }
-.icons{
+
+.icons img {
+  width: 24px;
+  height: 24px;
+}
+
+/* لوحة التحكم */
+.dashboard-btn {
+  display: inline-block;
+  background-color: #374151;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: 0.3s;
+  margin-top: 10px;
+}
+
+.dashboard-btn:hover {
+  background-color: #111827;
+}
+
+/* فورم لوحة التحكم */
+form.form {
   display: flex;
-  direction: rtl;
-  gap: 5px;
-}
-.facebook-logo{
-  width: 25px;
-  height: 25px;
-}
-
-
-/* لو الشاشة أصغر من 768px (موبايل) */
-@media (max-width: 768px) {
-
+  flex-direction: column;
+  gap: 10px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  width: 100%;
 }
 
-
-/* لو الشاشة أصغر من 1024px (تابلت) */
-@media (max-width: 1024px) {
-
+input, textarea, select, button {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
 }
 
+button {
+  background-color: #374151;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #111827;
+}
+
+/* القوائم والبطاقات */
+.menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  justify-items: center;
+  margin-top: 20px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  width: 180px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+
+.card h3 {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.card p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.price {
+  font-weight: bold;
+  color: #e63946;
+  font-size: 16px;
+}
+
+.actions button {
+  margin: 3px;
+  padding: 5px 8px;
+  font-size: 12px;
+}
+
+/* Dropdown Filter */
+.filter {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+/* زر العودة */
+.back-btn {
+  display: block;
+  margin: 20px auto;
+  width: fit-content;
+  padding: 10px 20px;
+  background: #007bff;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.back-btn:hover {
+  background: #0056b3;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  h1, .social p { font-size: 20px; }
+  .btn { font-size: 14px; padding: 8px 0; }
+  .card { width: 140px; padding: 8px; }
+  .card img { height: 120px; }
+  .actions button { padding: 4px 6px; font-size: 12px; }
+  .icons img { width: 20px; height: 20px; }
+  .buttons, form { max-width: 100%; }
+}
