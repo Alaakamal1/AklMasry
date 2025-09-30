@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
+
 export interface ICategory extends Document {
   _id:string;
   categoryName: string;
@@ -18,7 +19,6 @@ const CategorySchema: Schema = new Schema(
   { timestamps: true }
 );
 
-// 3️⃣ إنشاء الموديل
 const Category: Model<ICategory> =
   mongoose.models.Category || mongoose.model<ICategory>("Category", CategorySchema);
 

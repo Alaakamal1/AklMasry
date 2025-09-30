@@ -1,26 +1,4 @@
-// 'use client'
-// import { useRouter } from 'next/navigation'
 
-// export const dynamic = "force-dynamic";
-
-// export default function Dashboard() {
-//   const router = useRouter()
-
-//   const handleLogout = async () => {
-//     await fetch('/api/logout', { method: 'POST' })
-//     router.push('/login')
-//   }
-
-//   return (
-//     <div>
-//       <h1>📊 أهلاً بيكي في الداشبورد</h1>
-//       <button onClick={handleLogout}>تسجيل الخروج</button>
-//     </div>
-//   )
-// }
-
-
-// src/app/dashboard/page.tsx
 'use client'
 import useSWR from 'swr'
 import CategoriesPage from './category/page'
