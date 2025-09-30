@@ -1,115 +1,156 @@
-// // "use client";
+"use client";
+import { useEffect, useState } from "react";
+import SubCategoryForm from "./add/SubCategoryForm";
+import { Button } from "@/components/ui/button";
+import { ISubCategory } from "@/models/SubCategory";
+import { ICategory } from "@/models/Category";
+import toast from "react-hot-toast";
 
-// // import React, { useState, useEffect } from "react";
-// // import SubcategoryForm from "./SubcategoryForm";
-// // import * as Select from "@radix-ui/react-select";
-// // import { CategoryType } from "@/types/category";
-// // import { subCategory } from "@/types/subCategory";
+export default function SubcategoryPage() {
+  const [subcategories, setSubcategories] = useState<ISubCategory[]>([]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [open, setOpen] = useState(false);
+  const [editingSub, setEditingSub] = useState<ISubCategory | null>(null);
 
-// // export default function SubcategoriesPage() {
-// //   const [categories, setCategories] = useState<CategoryType[]>([]);
-// //   const [selectedCategory, setSelectedCategory] = useState<string>("");
-// //   const [subcategories, setSubcategories] = useState<subCategory[]>([]);
+  async function fetchSubcategories() {
+    const res = await fetch("/api/subcategory");
+    const data = await res.json();
+    setSubcategories(data);
+  }
 
-// //   useEffect(() => {
-// //     fetch("/api/category")
-// //       .then(res => res.json())
-// //       .then(setCategories);
-// //   }, []);
+  async function fetchCategories() {
+    const res = await fetch("/api/category");
+    const data = await res.json();
+    setCategories(data);
+  }
 
-// //   // جلب الأصناف عند اختيار الكاتيجوري
-// //   useEffect(() => {
-// //     if (selectedCategory) {
-// //       fetch(`/api/subcategory?categoryId=${selectedCategory}`)
-// //         .then(res => res.json())
-// //         .then(setSubcategories);
-// //     } else {
-// //       setSubcategories([]);
-// //     }
-// //   }, [selectedCategory]);
+  useEffect(() => {
+    fetchSubcategories();
+    fetchCategories();
+  }, []);
 
-// //   return (
-// //     <div>
-// //       <h1>إدارة الأصناف</h1>
+  async function handleDelete(sub: ISubCategory) {
+    toast(
+      (t) => (
+        <div className="bg-white p-4 rounded shadow-md flex flex-col gap-3">
+          <span>هل أنت متأكد من الحذف؟</span>
+          <div className="flex gap-2 justify-end">
+            <Button
+              onClick={async () => {
+                await fetch(`/api/subcategory`, {
+                  method: "DELETE",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ id: sub._id }),
+                });
+                fetchSubcategories();
+                toast.dismiss(t.id);
+                toast.success("تم الحذف بنجاح");
+              }}
+              className="text-red-600 border px-3 py-1 rounded"
+            >
+              حذف
+            </Button>
+            <Button
+              onClick={() => toast.dismiss(t.id)}
+              className="bg-gray-300 px-3 py-1 rounded"
+            >
+              إلغاء
+            </Button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity }
+    );
+  }
 
-// //       {/* Radix Dropdown */}
-// //       <Select.Root value={selectedCategory} onValueChange={setSelectedCategory}>
-// //         <Select.Trigger>
-// //           <Select.Value placeholder="اختر كاتيجوري" />
-// //         </Select.Trigger>
-// //         <Select.Content>
-// //           {categories.map(cat => (
-// //             <Select.Item key={cat._id} value={cat._id}>
-// //               <Select.ItemText>{cat.categoryName}</Select.ItemText>
-// //             </Select.Item>
-// //           ))}
-// //         </Select.Content>
-// //       </Select.Root>
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-xl font-bold">الأصناف الفرعية</h1>
+        <Button
+          onClick={() => {
+            setEditingSub(null);
+            setOpen(true);
+          }}
+          className="bg-green-600 text-white px-4 py-2 rounded"
+        >
+          إضافة
+        </Button>
+      </div>
 
-// //       {/* Form لإضافة صنف جديد */}
-// //       {selectedCategory && <SubcategoryForm categoryId={selectedCategory} />}
+      <table className="w-full border-collapse bg-white shadow rounded-xl">
+        <thead>
+          <tr className="bg-green-100">
+            <th className="p-2 border">الصنف الفرعي</th>
+            <th className="p-2 border">القسم الرئيسي</th>
+            <th className="p-2 border">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {subcategories.map((sub) => (
+            <tr key={sub._id} className="hover:bg-gray-50">
+              <td className="p-2 border">{sub.subCategoryName}</td>
+              <td className="p-2 border">{sub.categoryId?.categoryName}</td>
+              <td className="p-2 border flex gap-2 justify-center">
+                <Button
+                  onClick={() => {
+                    setEditingSub(sub);
+                    setOpen(true);
+                  }}
+                  className="bg-green-600 text-white px-4 py-1 rounded"
+                >
+                  تعديل
+                </Button>
+                <Button
+                  onClick={() => handleDelete(sub)}
+                  className="text-red-600 border px-4 py-1 rounded"
+                >
+                  حذف
+                </Button>
+              </td>
+            </tr>
+          ))}
+          {subcategories.length === 0 && (
+            <tr>
+              <td colSpan={3} className="p-4 text-center text-gray-500">
+                لا توجد أصناف فرعية
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
 
-// //       {/* عرض الأصناف */}
-// //       <ul>
-// //         {subcategories.map(sub => (
-// //           <li key={sub._id}>{sub.subCategoryName}</li>
-// //         ))}
-// //       </ul>
-// //     </div>
-// //   );
-// // }
+      {/* البوباب */}
+      {open && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg relative">
+            <button
+              onClick={() => setOpen(false)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            >
+              ✖
+            </button>
 
-
-// "use client";
-// import React, { useState, useEffect } from "react";
-// import SubcategoryForm from "./SubcategoryForm";
-// import Dropdown from "@/components/ui/Dropdown";
-// import ListTable from "@/components/ui/ListTable";
-
-// interface Category { _id: string; name: string }
-// interface Subcategory { _id: string; name: string }
-
-// export default function SubcategoriesPage() {
-//   const [categories, setCategories] = useState<Category[]>([]);
-//   const [selectedCategory, setSelectedCategory] = useState<string>("");
-//   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
-
-//   useEffect(() => {
-//     fetch("/api/category")
-//       .then(res => res.json())
-//       .then(setCategories);
-//   }, []);
-
-//   useEffect(() => {
-//     if (selectedCategory) {
-//       fetch(`/api/subcategories?categoryId=${selectedCategory}`)
-//         .then(res => res.json())
-//         .then(setSubcategories);
-//     } else {
-//       setSubcategories([]);
-//     }
-//   }, [selectedCategory]);
-
-//   const handleDelete = async (id: string) => {
-//     await fetch(`/api/subcategory/${id}`, { method: "DELETE" });
-//     setSubcategories(subcategories.filter(s => s._id !== id));
-//   };
-
-//   return (
-//     <div>
-//       <h1 className="text-xl font-bold mb-4">إدارة الأصناف</h1>
-//       <Dropdown
-//         value={selectedCategory}
-//         onChange={setSelectedCategory}
-//         options={categories}
-//         placeholder="اختر كاتيجوري"
-//       />
-//       {selectedCategory && <SubcategoryForm categoryId={selectedCategory} onSuccess={() => {
-//         fetch(`/api/subcategories?categoryId=${selectedCategory}`)
-//           .then(res => res.json())
-//           .then(setSubcategories);
-//       }} />}
-//       <ListTable data={subcategories} columns={[{ key: "name", label: "اسم الصنف" }]} onDelete={handleDelete} />
-//     </div>
-//   );
-// }
+            <SubCategoryForm
+              initialData={
+                editingSub
+                  ? {
+                      name: editingSub.subCategoryName,
+                      categoryId: editingSub.categoryId?._id,
+                      _id: editingSub._id,
+                    }
+                  : undefined
+              }
+              categories={categories}
+              onClose={() => setOpen(false)}
+              onSuccess={() => {
+                fetchSubcategories();
+                setOpen(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import SubCategory from "@/models/SubCategory";
 import { connectDB } from "@/lib/db";
 import Category from "@/models/Category";
-import { error } from "console";
 
 export async function GET() {
   try {
@@ -54,13 +53,17 @@ export async function POST(req: Request) {
   }
 }
 
+
+
 export async function PATCH(req: Request) {
   try {
     await connectDB();
+
     const body = await req.json();
     const { id, subCategoryName, isAvailable, categoryId } = body;
 
-    if (!id) return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });
+    if (!id)
+      return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });
 
     const subCategory = await SubCategory.findById(id);
     if (!subCategory)
@@ -71,8 +74,10 @@ export async function PATCH(req: Request) {
 
     if (subCategoryName) subCategory.subCategoryName = subCategoryName;
     if (isAvailable !== undefined) subCategory.isAvailable = isAvailable;
+
+
     if (categoryId) {
-      const category = await categoryId.findById(categoryId);
+      const category = await Category.findById(categoryId);
       if (!category)
         return NextResponse.json(
           { error: "القسم الرئيسي غير موجود" },

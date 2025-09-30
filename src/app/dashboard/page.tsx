@@ -1,39 +1,23 @@
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
-import Link from "next/link";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key";
+'use client'
+import useSWR from 'swr'
+import CategoriesPage from './category/page'
+import DishesPage from './dishes/page'
+import SubcategoryPage from './subcategory/page'
 
-export default async function DashboardPage() {
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("token")?.value;
-console.log(token);
+const fetcher = (url: string) => fetch(url).then(res => res.json())
 
-  if (!token) {
-    return (
-      <div>
-        <h1>Unauthorized</h1>
-        <Link href="/login">Go to Login</Link>
-      </div>
-    );
-  }
+export default function DashboardPage() {
+  const { data, error } = useSWR('/api/stats', fetcher)
 
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string; role: string };
+  if (error) return <div> حصل خطأ أثناء جلب البيانات</div>
+  if (!data) return <div> جاري التحميل...</div>
 
-    return (
-      <div>
-        <h1>Welcome to Dashboard</h1>
-        <p>User ID: {decoded.id}</p>
-        <p>Role: {decoded.role}</p>
-      </div>
-    );
-  } catch {
-    return (
-      <div>
-        <h1>Invalid token</h1>
-        <Link href="/login">Go to Login</Link>
-      </div>
-    );
-  }
+  return (
+    <div>
+      <CategoriesPage/>
+      <SubcategoryPage/>
+      <DishesPage/>
+    </div>
+  )
 }

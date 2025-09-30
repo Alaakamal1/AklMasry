@@ -1,48 +1,52 @@
-"use client";
-import { redirect } from "next/navigation";
-import { useState } from "react";
+'use client'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState('')
+  const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // <== مهم جدًا لكي يتم حفظ الكوكيز
-    });
+    e.preventDefault()
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+      headers: { 'Content-Type': 'application/json' }
+    })
 
     if (res.ok) {
-          redirect("/dashboard");
+      router.push('/dashboard')
     } else {
-      const data = await res.json();
-      alert(data.error || "خطأ في تسجيل الدخول");
+      alert('❌ كلمة السر غلط!')
     }
-  };
+  }
 
   return (
-    <form onSubmit={handleLogin} className="flex flex-col gap-4 max-w-sm mx-auto mt-20">
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        className="border p-2 rounded"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        className="border p-2 rounded"
-      />
-      <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-        Login
-      </button>
-    </form>
-  );
+    <form onSubmit={handleLogin} className="flex justify-center items-center min-h-screen  bg-gray-50">
+  <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8 flex flex-col items-center">
+    <h1 className="text-[#4c3f2d] font-bold text-xl mb-6 text-center">
+      ادخل كلمة المرور للتعديل
+    </h1>
+    
+    <Input
+      type="password"
+      placeholder="أدخل كلمة السر"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      className="mb-4 text-right py-5"
+    />
+
+    <Button 
+      className="bg-[#4c3f2d] hover:bg-[#3a3123] w-full py-6 text-gray-50 text-lg rounded-xl transition-all duration-300"
+      type="submit"
+    >
+      دخول
+    </Button>
+  </div>
+</form>
+
+  )
 }
+

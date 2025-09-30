@@ -7,7 +7,7 @@ export async function GET() {
     await connectDB();
     const categories = await Category.find().lean();
     return NextResponse.json(categories);
-  } catch (err) {
+  } catch (err :unknown) {
     return NextResponse.json(
       { error: "Failed to fetch categories" },
       { status: 500 }
