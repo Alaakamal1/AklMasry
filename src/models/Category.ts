@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-// 1️⃣ تعريف الـ Type (الخصائص اللي جوه الكاتيجوري)
 export interface ICategory extends Document {
   _id:string;
   categoryName: string;
@@ -10,7 +9,6 @@ export interface ICategory extends Document {
   updatedAt: Date;
 }
 
-// 2️⃣ سكيمة الـ Category
 const CategorySchema: Schema = new Schema(
   {
     categoryName: { type: String, required: true },

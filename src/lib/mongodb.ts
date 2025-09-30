@@ -24,3 +24,22 @@
 // }
 
 // export default dbConnect;
+
+
+// src/lib/mongodb.ts
+import { MongoClient } from 'mongodb'
+
+const uri = process.env.MONGODB_URI!
+if (!uri) throw new Error('MONGODB_URI is not defined in env')
+
+let cached: { client: MongoClient; db: any } | null = null
+
+export async function connectToDatabase() {
+  if (cached) return cached
+
+  const client = new MongoClient(uri)
+  await client.connect()
+  const db = client.db() // تستخدم اسم القاعدة الموجود في URI أو تضيفي db name هنا
+  cached = { client, db }
+  return cached
+}

@@ -1,129 +1,160 @@
-// // "use client";
+"use client";
+import { useEffect, useState } from "react";
+import CategoryForm from "./add/page";
+import { ICategory } from "@/models/Category";
+import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
-// // import { useEffect, useState } from "react";
-// // import CategoryForm from "./CategoryForm";
-// // import { Button } from "@/components/ui/button";
-// // import { CategoryType } from "@/types/category";
+interface ICategoryWithCount extends ICategory {
+  dishesCount?: number;
+}
 
+export default function CategoriesPage() {
+  const [categories, setCategories] = useState<ICategoryWithCount[]>([]);
+  const [open, setOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
 
-// // export default function CategoriesPage() {
-// //   const [categories, setCategories] = useState<CategoryType[]>([]);
+  // ✅ تحميل الأقسام الرئيسية مع عدد الأطباق
+  async function fetchCategories() {
+    const res = await fetch("/api/category");
+    const data: ICategory[] = await res.json();
 
-// //   const fetchCategories = async () => {
-// //     const res = await fetch("/api/category");
-// //     const data: CategoryType[] = await res.json();
-// //     setCategories(data);
-// //   };
+    const categoriesWithCount = await Promise.all(
+      data.map(async (cat) => {
+        const dishesRes = await fetch(`/api/subcategory?categoryId=${cat._id}`);
+        const dishes = await dishesRes.json();
+        return { ...cat, dishesCount: dishes.length };
+      })
+    );
 
-// //   const handleDelete = async (id: string) => {
-// //     await fetch(`/api/category/${id}`, { method: "DELETE" });
-// //     fetchCategories();
-// //   };
+    setCategories(categoriesWithCount);
+  }
 
-// //   useEffect(() => {
-// //     fetchCategories();
-// //   }, []);
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
-// //   return (
-// //     <div>
-// //       <h1>إدارة الكاتيجوريز</h1>
-// //       <CategoryForm onSuccess={fetchCategories} />
-// //       <ul>
-// //         {categories.map((cat) => (
-// //           <li key={cat._id}>
-// //             {cat.categoryName} 
-// //             <Button onClick={() => handleDelete(cat._id)}>حذف</Button>
-// //           </li>
-// //         ))}
-// //       </ul>
-// //     </div>
-// //   );
-// // }
+  // ✅ حذف قسم مع toast confirmation
+  async function handleDelete(id: string) {
+    const result = await new Promise<boolean>((resolve) => {
+      toast.custom((t) => (
+        <div className="bg-white p-4 rounded shadow-lg flex flex-col gap-3 w-72 mx-auto">
+          <span className="font-medium">هل أنت متأكد من الحذف؟</span>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => { resolve(true); toast.dismiss(t.id); }}
+              className="bg-red-600 text-white px-3 py-1 rounded"
+            >
+              حذف
+            </button>
+            <button
+              onClick={() => { resolve(false); toast.dismiss(t.id); }}
+              className="bg-gray-300 px-3 py-1 rounded"
+            >
+              إلغاء
+            </button>
+          </div>
+        </div>
+      ));
+    });
 
-// "use client";
-// import React, { useState, useEffect } from "react";
-// import {CategoryForm} from "@/components/CategoryForm";
-// import ListTable from "@/components/ui/ListTable";
-// import { ICategory } from "@/models/Category";
+    if (!result) return;
 
-// export default function CategoriesPage() {
-//   const [categories, setCategories] = useState<ICategory[]>([]);
+    try {
+      await fetch(`/api/category?id=${id}`, { method: "DELETE" });
+      fetchCategories();
+      toast.success("تم الحذف بنجاح", { duration: 2000 });
+    } catch {
+      toast.error("حدث خطأ أثناء الحذف", { duration: 2000 });
+    }
+  }
 
-//   const fetchCategories = async () => {
-//     const res = await fetch("/api/category");
-//     const data: ICategory[] = await res.json();
-//     setCategories(data);
-//   };
+  function handleAdd() {
+    setEditingCategory(null);
+    setOpen(true);
+  }
 
-//   const handleDelete = async (id: string) => {
-//     await fetch(`/api/category/${id}`, { method: "DELETE" });
-//     fetchCategories();
-//   };
+  function handleEdit(cat: ICategory) {
+    setEditingCategory(cat);
+    setOpen(true);
+  }
 
-//   useEffect(() => {
-//     fetchCategories();
-//   }, []);
+  return (
+    <div className="p-6 space-y-6 ">
+      
+      {/* الجدول */}
+      <div className="bg-white shadow rounded-xl p-4 mt-4">
+        <div className="flex justify-between pb-2">
+          <h2 className="text-lg font-bold mb-4">قائمة الأقسام الرئيسية</h2>
+          <Button
+            onClick={handleAdd}
+            className="bg-green-600 text-white py-5 hover:bg-green-700"
+          >
+            إضافة صنف جديد 
+          </Button>
+        </div>
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-green-50">
+              <th className="p-2 border">الاسم</th>
+              <th className="p-2 border">عدد الأطباق</th>
+              <th className="p-2 border">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {categories.map((cat) => (
+              <tr key={cat._id} className="hover:bg-gray-50">
+                <td className="p-2 border">{cat.categoryName}</td>
+                <td className="p-2 border text-center">{cat.dishesCount ?? 0}</td>
+                <td className="p-2 border flex gap-2 justify-center">
+                  <Button
+                    onClick={() => handleEdit(cat)}
+                    className="border bg-green-600 text-white px-3 py-1 rounded"
+                  >
+                    تعديل
+                  </Button>
+                  <Button
+                    onClick={() => handleDelete(cat._id)}
+                    className="border text-red-600 px-3 py-1 rounded"
+                  >
+                    حذف
+                  </Button>
+                </td>
+              </tr>
+            ))}
+            {categories.length === 0 && (
+              <tr>
+                <td colSpan={3} className="p-4 text-center text-gray-500">
+                  لا توجد أقسام مضافة بعد
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
-//   return (
-//     <div>
-//       <h1 className="text-xl font-bold mb-4">إدارة الكاتيجوريز</h1>
-//       <CategoryForm onSuccess={fetchCategories} />
-//       <ListTable data={categories} columns={[{ key: "name", label: "اسم الكاتيجوري" }]} onDelete={handleDelete} />
-//     </div>
-//   );
-// }
+      {/* المودال */}
+      {open && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg relative">
+            <button
+              onClick={() => setOpen(false)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            >
+              ✖
+            </button>
 
-// "use client";
-// import { useState } from "react";
-
-// export default function CategoryForm() {
-//   const [name, setName] = useState("");
-//   const [description, setDescription] = useState("");
-//   const [message, setMessage] = useState("");
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-
-//     const res = await fetch("/dashboard/categories/api/categories", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ name, description }),
-//     });
-
-//     const data = await res.json();
-
-//     if (res.ok) {
-//       setMessage("Category added successfully!");
-//       setName("");
-//       setDescription("");
-//     } else {
-//       setMessage(data.error || "Something went wrong.");
-//     }
-//   };
-
-//   return (
-//     <div className="max-w-md mx-auto mt-10 p-6 border rounded">
-//       <h1 className="text-xl font-bold mb-4">Add New Category</h1>
-//       {message && <p className="mb-4 text-green-600">{message}</p>}
-//       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-//         <input
-//           type="text"
-//           placeholder="Category Name"
-//           value={name}
-//           onChange={(e) => setName(e.target.value)}
-//           required
-//           className="border p-2 rounded"
-//         />
-//         <textarea
-//           placeholder="Description"
-//           value={description}
-//           onChange={(e) => setDescription(e.target.value)}
-//           className="border p-2 rounded"
-//         />
-//         <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-//           Add Category
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }
+            <CategoryForm
+              initialData={editingCategory}
+              onClose={() => setOpen(false)}
+              onSuccess={() => {
+                fetchCategories();
+                setOpen(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

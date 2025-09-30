@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import SubCategory from "@/models/SubCategory";
 import { connectDB } from "@/lib/db";
 import Category from "@/models/Category";
-import { error } from "console";
 
 export async function GET() {
   try {
@@ -54,13 +53,17 @@ export async function POST(req: Request) {
   }
 }
 
+
+
 export async function PATCH(req: Request) {
   try {
     await connectDB();
+
     const body = await req.json();
     const { id, subCategoryName, isAvailable, categoryId } = body;
 
-    if (!id) return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });
+    if (!id)
+      return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });
 
     const subCategory = await SubCategory.findById(id);
     if (!subCategory)
@@ -71,8 +74,9 @@ export async function PATCH(req: Request) {
 
     if (subCategoryName) subCategory.subCategoryName = subCategoryName;
     if (isAvailable !== undefined) subCategory.isAvailable = isAvailable;
+
     if (categoryId) {
-      const category = await categoryId.findById(categoryId);
+      const category = await Category.findById(categoryId);
       if (!category)
         return NextResponse.json(
           { error: "القسم الرئيسي غير موجود" },
@@ -83,14 +87,10 @@ export async function PATCH(req: Request) {
 
     await subCategory.save();
     return NextResponse.json(subCategory, { status: 200 });
+
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      return NextResponse.json(
-        { error: err.message || String(err) },
-        { status: 500 }
-      );
-    }
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
