@@ -75,6 +75,10 @@ export async function PATCH(req: Request) {
     if (subCategoryName) subCategory.subCategoryName = subCategoryName;
     if (isAvailable !== undefined) subCategory.isAvailable = isAvailable;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0b7272c99d18ba48276db212c7945dac92d79ab3
     if (categoryId) {
       const category = await Category.findById(categoryId);
       if (!category)
@@ -87,10 +91,21 @@ export async function PATCH(req: Request) {
 
     await subCategory.save();
     return NextResponse.json(subCategory, { status: 200 });
+<<<<<<< HEAD
 
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: message }, { status: 500 });
+=======
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return NextResponse.json(
+        { error: err.message || String(err) },
+        { status: 500 }
+      );
+    }
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+>>>>>>> 0b7272c99d18ba48276db212c7945dac92d79ab3
   }
 }
 

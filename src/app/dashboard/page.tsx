@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // 'use client'
 // import { useRouter } from 'next/navigation'
 
@@ -21,6 +22,9 @@
 
 
 // src/app/dashboard/page.tsx
+=======
+
+>>>>>>> 0b7272c99d18ba48276db212c7945dac92d79ab3
 'use client'
 import useSWR from 'swr'
 import CategoriesPage from './category/page'
@@ -42,4 +46,8 @@ export default function DashboardPage() {
       <DishesPage/>
     </div>
   )
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 0b7272c99d18ba48276db212c7945dac92d79ab3
