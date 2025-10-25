@@ -5,18 +5,16 @@ import Dish from "@/models/Dish";
 
 export async function GET(
   req: Request,
-  { params }: { params: { subCategoryId: string } }
+  context: { params: Promise<{ subCategoryId: string }> }
 ) {
   try {
-    const { subCategoryId } = params;
+    const { subCategoryId } = await context.params; // 👈 استخدام await هنا
     await connectDB();
 
-    // استعلام مع النوع الصحيح
-    const query: { subCategoryId: mongoose.Types.ObjectId | string } = {
-      subCategoryId: mongoose.Types.ObjectId.isValid(subCategoryId)
-        ? new mongoose.Types.ObjectId(subCategoryId)
-        : subCategoryId,
-    };
+    const query =
+      mongoose.Types.ObjectId.isValid(subCategoryId)
+        ? { subCategoryId: new mongoose.Types.ObjectId(subCategoryId) }
+        : { subCategoryId: subCategoryId };
 
     const dishes = await Dish.find(query).lean();
 
