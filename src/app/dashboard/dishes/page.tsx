@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import DishForm from "./add/page";
+import DishForm from "../../../components/DishForm";
 import { IDish } from "@/models/Dish";
 import { ICategory } from "@/models/Category";
 import { ISubCategory } from "@/models/SubCategory";

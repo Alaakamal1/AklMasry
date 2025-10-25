@@ -10,7 +10,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     await connectDB();
 
     const body: Partial<IDish> = await req.json();
-    const { dishName, price, subCategoryId, image } = body;
+    const { dishName, price, subCategoryId } = body;
 
     if (!dishName || !price || !subCategoryId) {
       return NextResponse.json(
@@ -29,7 +29,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const dish = await Dish.create({
       dishName,
       price,
-      image,
       subCategoryId,
     });
 

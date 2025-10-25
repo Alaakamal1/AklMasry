@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import CategoryForm from "./add/page";
+import CategoryForm from "../../../components/CategoryForm";
 import { ICategory } from "@/models/Category";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
@@ -27,7 +27,6 @@ async function fetchCategories() {
 
     const data = await res.json();
 
-    // خلاص subCount جاي من الباك إند، مش محتاج طلبات فرعية
     const categoriesWithCount = data.map((cat: ICategoryWithCount) => ({
       ...cat,
       createdAt: new Date(cat.createdAt),

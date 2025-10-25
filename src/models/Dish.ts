@@ -1,10 +1,11 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
+import { ISubCategory } from "./SubCategory";
 export interface IDish extends Document {
   _id:string;
   dishName: string;
   description?: string;
   price: number;
-  subCategoryId: string;
+  subCategoryId: string | ISubCategory;
   isAvailable: boolean;
 }
 

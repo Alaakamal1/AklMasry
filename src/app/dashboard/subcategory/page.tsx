@@ -1,7 +1,7 @@
 "use client";
 
 import { JSX, useEffect, useState } from "react";
-import SubCategoryForm from "./add/page";
+import SubCategoryForm from "../../../components/SubCategoryForm";
 import { Button } from "@/components/ui/button";
 import { ISubCategory } from "@/models/SubCategory";
 import { ICategory } from "@/models/Category";
