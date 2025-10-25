@@ -17,15 +17,22 @@ export default function CategoryPage() {
   const [loadingSubCategories, setLoadingSubCategories] = useState(true);
   const [loadingDishes, setLoadingDishes] = useState<string | null>(null);
 
+  // جلب SubCategories
   useEffect(() => {
     if (!categoryId) return;
     setLoadingSubCategories(true);
+
     fetch(`/api/subcategory/${categoryId}`)
       .then((res) => res.json())
-      .then((data) => setSubCategories(data))
+      .then((data) => {
+        if (Array.isArray(data)) setSubCategories(data);
+        else setSubCategories([]);
+      })
+      .catch(() => setSubCategories([]))
       .finally(() => setLoadingSubCategories(false));
   }, [categoryId]);
 
+  // تبديل SubCategory وعرض الأطباق
   const toggleSubCategory = async (subCategoryId: string) => {
     if (openSubCategory === subCategoryId) {
       setOpenSubCategory(null);
@@ -35,17 +42,25 @@ export default function CategoryPage() {
 
     if (!dishes[subCategoryId]) {
       setLoadingDishes(subCategoryId);
-      const res = await fetch(`/api/dishes/${subCategoryId}`);
-      const data = await res.json();
-      setDishes((prev) => ({ ...prev, [subCategoryId]: data }));
-      setLoadingDishes(null);
+      try {
+        const res = await fetch(`/api/dishes/${subCategoryId}`);
+        const data = await res.json();
+        setDishes((prev) => ({
+          ...prev,
+          [subCategoryId]: Array.isArray(data) ? data : data.dishes ?? [],
+        }));
+      } catch (error) {
+        setDishes((prev) => ({ ...prev, [subCategoryId]: [] }));
+      } finally {
+        setLoadingDishes(null);
+      }
     }
   };
 
   return (
-    <main className="min-h-screen p-10  bg-[#F1E8DA]">
+    <main className="min-h-screen p-10 bg-[#F1E8DA]">
       <h1 className="text-3xl font-bold mb-6 text-[#674636] text-center">
-        {categoryName}
+        {categoryName ?? "الفئة"}
       </h1>
 
       <div className="space-y-4">
@@ -56,12 +71,15 @@ export default function CategoryPage() {
                 className="h-14 bg-[#613829] rounded-xl animate-pulse"
               ></div>
             ))
+          : subCategories.length === 0
+          ? (
+            <p className="text-center text-gray-500">لا توجد فئات فرعية حالياً</p>
+          )
           : subCategories.map((sub) => (
               <div
                 key={sub._id}
                 className="rounded-xl shadow bg-gray-50 overflow-hidden"
               >
-                {/* الزر الأساسي لفتح الدروب داون */}
                 <button
                   onClick={() => toggleSubCategory(sub._id)}
                   className="w-full flex justify-between items-center p-4 text-lg font-semibold bg-[#6d3f2e] text-[#FFF8E8] hover:bg-[#5f3728] transition"
@@ -86,7 +104,6 @@ export default function CategoryPage() {
                       </div>
                     )}
 
-                    {/* الأطباق */}
                     {loadingDishes === sub._id ? (
                       <ul className="space-y-3">
                         {Array.from({ length: 3 }).map((_, i) => (
@@ -109,9 +126,7 @@ export default function CategoryPage() {
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-gray-500 text-center">
-                        لا يوجد أطباق حالياً
-                      </p>
+                      <p className="text-gray-500 text-center">لا يوجد أطباق حالياً</p>
                     )}
                   </div>
                 )}
