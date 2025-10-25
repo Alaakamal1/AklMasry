@@ -1,17 +1,28 @@
 // src/middleware.ts
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { getIronSession } from "iron-session";
+import { NextResponse } from "next/server";
+import { sessionOptions } from "@/lib/session";
+import type { IronSession } from "iron-session";
 
-export function middleware(req: NextRequest) {
-  const auth = req.cookies.get('auth')?.value
+export async function middleware(req: Request) {
+  const res = NextResponse.next();
+const session = (await getIronSession(req, res, sessionOptions)) as IronSession<{
+  user?: {
+    id: string;
+    name: string;
+    role: string;
+  };
+}>;
+  // حدد المسارات المحمية
+  const protectedRoutes = ["/dashboard"];
 
-  if (req.nextUrl.pathname.startsWith('/dashboard') && auth !== 'true') {
-    return NextResponse.redirect(new URL('/', req.url))
+  if (protectedRoutes.some((path) => req.url.includes(path)) && !session.user) {
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  return NextResponse.next()
+  return res;
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
-}
+  matcher: ["/dashboard/:path*"], // أي صفحة داخل /dashboard
+};

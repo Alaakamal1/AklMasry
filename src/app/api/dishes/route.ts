@@ -1,24 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
-import Dish from "@/models/Dish";
+import Dish, { IDish } from "@/models/Dish";
 import SubCategory from "@/models/SubCategory";
 
-// ✅ POST: إضافة Dish جديدة
-export async function POST(req: Request) {
+/* ---------------------------------- POST ---------------------------------- */
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     await connectDB();
-    const body = await req.json();
+
+    const body: Partial<IDish> = await req.json();
     const { dishName, price, subCategoryId, image } = body;
 
-    // تحقق من البيانات
     if (!dishName || !price || !subCategoryId) {
       return NextResponse.json(
         { error: "البيانات غير مكتملة" },
         { status: 400 }
       );
     }
-
-    // تحقق أن الـ SubCategory موجودة
     const subCategory = await SubCategory.findById(subCategoryId);
     if (!subCategory) {
       return NextResponse.json(
@@ -27,7 +26,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // إنشاء الطبق
     const dish = await Dish.create({
       dishName,
       price,
@@ -36,15 +34,19 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(dish, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "حدث خطأ أثناء الإضافة";
+    console.error("POST /api/dishes error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-// ✅ GET: جلب كل الأطباق (مع القسم الرئيسي والفرعي)
-export async function GET() {
+/* ---------------------------------- GET ----------------------------------- */
+export async function GET(): Promise<NextResponse> {
   try {
     await connectDB();
+
     const dishes = await Dish.find()
       .populate({
         path: "subCategoryId",
@@ -54,48 +56,78 @@ export async function GET() {
           select: "categoryName",
         },
       })
-      .lean();
+      .lean<IDish[]>();
 
     return NextResponse.json(dishes, { status: 200 });
-  } catch (err: unknown) {
-    return NextResponse.json(
-      { error: "فشل في جلب الأطباق" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "فشل في جلب الأطباق";
+    console.error("GET /api/dishes error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-// ✅ PUT: تعديل طبق
-export async function PUT(req: Request) {
+/* ---------------------------------- PATCH ----------------------------------- */
+export async function PATCH(req: NextRequest): Promise<NextResponse> {
   try {
     await connectDB();
-    const body = await req.json();
-    const { id, dishName, price, subCategoryId, image } = body;
+
+    const body: Partial<IDish> & { id?: string } = await req.json();
+    const { id, dishName, price, subCategoryId } = body;
 
     if (!id) {
       return NextResponse.json({ error: "ID غير موجود" }, { status: 400 });
     }
 
-    const updatedDish = await Dish.findByIdAndUpdate(
-      id,
-      { dishName, price, subCategoryId, image },
-      { new: true }
-    );
-
-    if (!updatedDish) {
+    const dish = await Dish.findById(id);
+    if (!dish) {
       return NextResponse.json({ error: "الطبق غير موجود" }, { status: 404 });
     }
 
+    const updateFields: Record<string, unknown> = {};
+    if (dishName !== undefined) updateFields.dishName = dishName;
+    if (price !== undefined) updateFields.price = price;
+
+    if (subCategoryId !== undefined) {
+      if (typeof subCategoryId === "string") {
+        if (!mongoose.Types.ObjectId.isValid(subCategoryId)) {
+          return NextResponse.json(
+            { error: "قيمة subCategoryId غير صالحة" },
+            { status: 400 }
+          );
+        }
+        updateFields.subCategoryId = new mongoose.Types.ObjectId(subCategoryId);
+      } else if (subCategoryId instanceof mongoose.Types.ObjectId) {
+        updateFields.subCategoryId = subCategoryId;
+      } else {
+        return NextResponse.json(
+          { error: "subCategoryId لازم يكون string أو ObjectId" },
+          { status: 400 }
+        );
+      }
+    }
+
+    const updatedDish = await Dish.findByIdAndUpdate(id, updateFields, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedDish) {
+      return NextResponse.json({ error: "الطبق غير موجود بعد التحديث" }, { status: 404 });
+    }
+
     return NextResponse.json(updatedDish, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "حدث خطأ أثناء التعديل";
+    console.error("PATCH /api/dishes error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-
-// ✅ DELETE: حذف طبق
-export async function DELETE(req: Request) {
+/* -------------------------------- DELETE ---------------------------------- */
+export async function DELETE(req: NextRequest): Promise<NextResponse> {
   try {
     await connectDB();
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
@@ -110,11 +142,10 @@ export async function DELETE(req: Request) {
     }
 
     return NextResponse.json({ message: "تم الحذف بنجاح" }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "حدث خطأ أثناء الحذف";
+    console.error("DELETE /api/dishes error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 0b7272c99d18ba48276db212c7945dac92d79ab3

@@ -1,18 +1,16 @@
-// models/SubCategory.ts
 import mongoose, { Schema, Document, Model } from "mongoose";
+import { ICategory } from "./Category";
 
-// 1️⃣ تعريف الـ Interface (الخصائص اللي جوه الـ SubCategory)
 export interface ISubCategory extends Document {
   _id:string;
   subCategoryName: string;
   image?: string;
-  categoryId: mongoose.Types.ObjectId | null;
+  categoryId: mongoose.Types.ObjectId | ICategory | null;
   isAvailable: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// 2️⃣ السكيمة
 const SubCategorySchema: Schema = new Schema(
   {
     subCategoryName: { type: String, required: true },

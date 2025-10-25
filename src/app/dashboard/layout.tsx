@@ -1,14 +1,10 @@
-
 import { Toaster } from "react-hot-toast";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        {children}
+    <div>
+      {children}
         <Toaster position="top-right" reverseOrder={false} />
-      </body>
-    </html>
+    </div>
   );
 }
-

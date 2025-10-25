@@ -6,35 +6,48 @@ import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 
 interface ICategoryWithCount extends ICategory {
-  dishesCount?: number;
+  subCount?: number;
 }
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<ICategoryWithCount[]>([]);
   const [open, setOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
+  const [editingCategory, setEditingCategory] = useState<ICategory | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
 
-  // ✅ تحميل الأقسام الرئيسية مع عدد الأطباق
-  async function fetchCategories() {
+async function fetchCategories() {
+  setLoading(true);
+  try {
     const res = await fetch("/api/category");
-    const data: ICategory[] = await res.json();
+    if (!res.ok) {
+      throw new Error("Failed to fetch categories");
+    }
 
-    const categoriesWithCount = await Promise.all(
-      data.map(async (cat) => {
-        const dishesRes = await fetch(`/api/subcategory?categoryId=${cat._id}`);
-        const dishes = await dishesRes.json();
-        return { ...cat, dishesCount: dishes.length };
-      })
-    );
+    const data = await res.json();
+
+    // خلاص subCount جاي من الباك إند، مش محتاج طلبات فرعية
+    const categoriesWithCount = data.map((cat: ICategoryWithCount) => ({
+      ...cat,
+      createdAt: new Date(cat.createdAt),
+      updatedAt: new Date(cat.updatedAt),
+    }));
 
     setCategories(categoriesWithCount);
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+    toast.error("حدث خطأ أثناء تحميل الأقسام", { duration: 2000 });
+  } finally {
+    setLoading(false);
   }
+}
+
 
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  // ✅ حذف قسم مع toast confirmation
   async function handleDelete(id: string) {
     const result = await new Promise<boolean>((resolve) => {
       toast.custom((t) => (
@@ -42,13 +55,19 @@ export default function CategoriesPage() {
           <span className="font-medium">هل أنت متأكد من الحذف؟</span>
           <div className="flex justify-end gap-2">
             <button
-              onClick={() => { resolve(true); toast.dismiss(t.id); }}
+              onClick={() => {
+                resolve(true);
+                toast.dismiss(t.id);
+              }}
               className="bg-red-600 text-white px-3 py-1 rounded"
             >
               حذف
             </button>
             <button
-              onClick={() => { resolve(false); toast.dismiss(t.id); }}
+              onClick={() => {
+                resolve(false);
+                toast.dismiss(t.id);
+              }}
               className="bg-gray-300 px-3 py-1 rounded"
             >
               إلغاء
@@ -81,48 +100,70 @@ export default function CategoriesPage() {
 
   return (
     <div className="p-6 space-y-6 ">
-      
       {/* الجدول */}
       <div className="bg-white shadow rounded-xl p-4 mt-4">
-        <div className="flex justify-between pb-2">
-          <h2 className="text-lg font-bold mb-4">قائمة الأقسام الرئيسية</h2>
+        <div className="flex justify-between pb-2 max-sm:flex-col">
+          <h2 className="text-lg font-bold mb-4 sm:text-xl max-sm:text-center">
+            قائمة الأقسام الرئيسية
+          </h2>
           <Button
             onClick={handleAdd}
-            className="bg-green-600 text-white py-5 hover:bg-green-700"
+            className="bg-green-600 text-white py-5 hover:bg-green-700  sm:text-base"
           >
-            إضافة صنف جديد 
+            إضافه صنف رئيسي{" "}
           </Button>
         </div>
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-green-50">
               <th className="p-2 border">الاسم</th>
-              <th className="p-2 border">عدد الأطباق</th>
+              <th className="p-2 border">عدد الأصناف الفرعية</th>
               <th className="p-2 border">الإجراءات</th>
             </tr>
           </thead>
           <tbody>
-            {categories.map((cat) => (
-              <tr key={cat._id} className="hover:bg-gray-50">
-                <td className="p-2 border">{cat.categoryName}</td>
-                <td className="p-2 border text-center">{cat.dishesCount ?? 0}</td>
-                <td className="p-2 border flex gap-2 justify-center">
-                  <Button
-                    onClick={() => handleEdit(cat)}
-                    className="border bg-green-600 text-white px-3 py-1 rounded"
-                  >
-                    تعديل
-                  </Button>
-                  <Button
-                    onClick={() => handleDelete(cat._id)}
-                    className="border text-red-600 px-3 py-1 rounded"
-                  >
-                    حذف
-                  </Button>
-                </td>
-              </tr>
-            ))}
-            {categories.length === 0 && (
+            {loading
+              ? [...Array(3)].map((_, i) => (
+                  <tr key={i}>
+                    <td className="p-2 border text-center">
+                      <div className="h-4 bg-gray-200 animate-pulse rounded w-32"></div>
+                    </td>
+                    <td className="p-2 border text-center">
+                      <div className="h-4 bg-gray-200 animate-pulse rounded w-12 mx-auto"></div>
+                    </td>
+                    <td className="p-2 border text-center">
+                      <div className="flex gap-2 justify-center">
+                        <div className="h-8 w-16 bg-gray-200 animate-pulse rounded"></div>
+                        <div className="h-8 w-16 bg-gray-200 animate-pulse rounded"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              : categories.map((cat) => (
+                  <tr key={cat._id} className="hover:bg-gray-50">
+                    <td className="p-2 border">{cat.categoryName}</td>
+                    <td className="p-2 border text-center">
+                      {cat.subCount ?? 0}
+                    </td>
+                    <td className="p-3 border text-center">
+                      <div className="flex flex-col md:flex-row justify-center gap-2">
+                      <Button
+                        onClick={() => handleEdit(cat)}
+                        className="border bg-green-600 text-white px-3 py-1 rounded w-full md:w-auto"
+                      >
+                        تعديل
+                      </Button>
+                      <Button
+                        onClick={() => handleDelete(cat._id)}
+                        className="border text-red-600 px-3 py-1 rounded w-full md:w-auto"
+                      >
+                        حذف
+                      </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+            {!loading && categories.length === 0 && (
               <tr>
                 <td colSpan={3} className="p-4 text-center text-gray-500">
                   لا توجد أقسام مضافة بعد
@@ -137,13 +178,7 @@ export default function CategoriesPage() {
       {open && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg relative">
-            <button
-              onClick={() => setOpen(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-            >
-              ✖
-            </button>
-
+  
             <CategoryForm
               initialData={editingCategory}
               onClose={() => setOpen(false)}

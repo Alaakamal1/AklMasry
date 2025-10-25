@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { ICategory } from "@/models/Category";
 import toast from "react-hot-toast";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   initialData?: ICategory | null;
@@ -42,17 +44,17 @@ export default function CategoryForm({ initialData, onClose, onSuccess }: Props)
       onClose();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      toast.error("❌ خطأ: " + error.message);
+      toast.error("خطأ: " + error.message);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 ">
       <h2 className="text-lg font-bold">
         {initialData ? "تعديل القسم" : "إضافة قسم جديد"}
       </h2>
 
-      <input
+      <Input
         type="text"
         placeholder="اسم القسم"
         value={categoryName}
@@ -61,19 +63,19 @@ export default function CategoryForm({ initialData, onClose, onSuccess }: Props)
       />
 
       <div className="flex gap-2">
-        <button
+        <Button
           type="submit"
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          className="bg-green-600 text-white w-55 px-4 py-2  max-sm:w-38 rounded"
         >
           حفظ
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={onClose}
-          className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+          className="bg-gray-300 px-4 py-2 w-58 max-sm:w-38 rounded"
         >
           إلغاء
-        </button>
+        </Button>
       </div>
     </form>
   );

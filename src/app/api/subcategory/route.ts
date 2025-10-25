@@ -1,23 +1,95 @@
-import { NextResponse } from "next/server";
-import SubCategory from "@/models/SubCategory";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+import { NextRequest, NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
+import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import Category from "@/models/Category";
+import SubCategory, { ISubCategory } from "@/models/SubCategory";
+import Dish from "@/models/Dish";
 
-export async function GET() {
+async function saveFileToUploads(file: File, folder: string): Promise<string> {
+  const uploadDir = path.join(process.cwd(), `public/uploads/${folder}`);
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const filename = `${Date.now()}-${file.name}`;
+  const filePath = path.join(uploadDir, filename);
+  fs.writeFileSync(filePath, buffer);
+
+  return `/uploads/${folder}/${filename}`;
+}
+
+export async function GET(): Promise<NextResponse> {
   try {
     await connectDB();
-    const subCategories = await SubCategory.find().populate("categoryId").lean();
+    const subCategories = await SubCategory.find()
+      .populate("categoryId")
+      .lean<ISubCategory[]>();
     return NextResponse.json(subCategories, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-
-export async function POST(req: Request) {
+/* --------------------------------------------
+   POST — Create subcategory
+-------------------------------------------- */
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     await connectDB();
-    const body = await req.json();
+    const contentType = req.headers.get("content-type") || "";
+
+    // 🟩 في حالة multipart/form-data (رفع صورة)
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+      const subCategoryName = formData.get("subCategoryName") as string | null;
+      const categoryId = formData.get("categoryId") as string | null;
+      const file = formData.get("image") as File | null;
+
+      if (!subCategoryName || !categoryId) {
+        return NextResponse.json(
+          { error: "البيانات غير مكتملة" },
+          { status: 400 }
+        );
+      }
+
+      const category = await Category.findById(categoryId);
+      if (!category) {
+        return NextResponse.json(
+          { error: "القسم الرئيسي غير موجود" },
+          { status: 404 }
+        );
+      }
+
+      let imagePath = "";
+      if (file && file.size > 0) {
+        imagePath = await saveFileToUploads(file, "subcategories");
+      }
+
+      // ✅ تأكيد أن الـ categoryId هو string أو ObjectId فقط
+      const categoryIdValue =
+        typeof categoryId === "object" && "_id" in categoryId
+          ? (categoryId as { _id: string })._id
+          : categoryId;
+
+      const subCategory = await SubCategory.create({
+        subCategoryName,
+        categoryId: new mongoose.Types.ObjectId(categoryIdValue),
+        image: imagePath,
+      });
+
+      const populated = await subCategory.populate("categoryId");
+      return NextResponse.json(populated, { status: 201 });
+    }
+
+    const body = (await req.json()) as Pick<
+      ISubCategory,
+      "subCategoryName" | "categoryId"
+    >;
+
     const { subCategoryName, categoryId } = body;
 
     if (!subCategoryName || !categoryId) {
@@ -34,104 +106,125 @@ export async function POST(req: Request) {
         { status: 404 }
       );
     }
+
+    const categoryIdValue =
+      typeof categoryId === "object" && "_id" in categoryId
+        ? (categoryId as { _id: string })._id
+        : categoryId;
+
     const subCategory = await SubCategory.create({
       subCategoryName,
-      categoryId,
+      categoryId: new mongoose.Types.ObjectId(categoryIdValue),
     });
 
-    const populatedSubCategory = await subCategory.populate("categoryId");
-
-    return NextResponse.json(populatedSubCategory, { status: 201 });
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      return NextResponse.json(
-        { error: err.message || String(err) },
-        { status: 500 }
-      );
-    }
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    const populated = await subCategory.populate("categoryId");
+    return NextResponse.json(populated, { status: 201 });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "حدث خطأ غير متوقع";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-
-
-export async function PATCH(req: Request) {
+/* --------------------------------------------
+   📍 PATCH — Update subcategory
+-------------------------------------------- */
+export async function PATCH(req: NextRequest): Promise<NextResponse> {
   try {
     await connectDB();
+    const contentType = req.headers.get("content-type") || "";
 
-    const body = await req.json();
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+      const id = formData.get("id") as string | null;
+      const subCategoryName = formData.get("subCategoryName") as string | null;
+      const isAvailable = formData.get("isAvailable") as string | null;
+      const categoryId = formData.get("categoryId") as string | null;
+      const file = formData.get("subCategoryImage") as File | null;
+
+      if (!id) {
+        return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });
+      }
+
+      const subCategory = await SubCategory.findById(id);
+      if (!subCategory) {
+        return NextResponse.json({ error: "القسم الفرعي غير موجود" }, { status: 404 });
+      }
+
+      if (subCategoryName) subCategory.subCategoryName = subCategoryName;
+      if (isAvailable !== null) subCategory.isAvailable = isAvailable === "true";
+
+      if (categoryId) {
+        const category = await Category.findById(categoryId);
+        if (!category) {
+          return NextResponse.json({ error: "القسم الرئيسي غير موجود" }, { status: 404 });
+        }
+        subCategory.categoryId = new mongoose.Types.ObjectId(categoryId);
+      }
+
+      if (file && file.size > 0) {
+        subCategory.image = await saveFileToUploads(file, "subcategories");
+      }
+
+      await subCategory.save();
+      return NextResponse.json(subCategory, { status: 200 });
+    }
+    const body = (await req.json()) as Partial<ISubCategory> & { id: string };
     const { id, subCategoryName, isAvailable, categoryId } = body;
 
-    if (!id)
+    if (!id) {
       return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });
+    }
 
     const subCategory = await SubCategory.findById(id);
-    if (!subCategory)
-      return NextResponse.json(
-        { error: "القسم الفرعي غير موجود" },
-        { status: 404 }
-      );
+    if (!subCategory) {
+      return NextResponse.json({ error: "القسم الفرعي غير موجود" }, { status: 404 });
+    }
 
     if (subCategoryName) subCategory.subCategoryName = subCategoryName;
-    if (isAvailable !== undefined) subCategory.isAvailable = isAvailable;
+    if (typeof isAvailable === "boolean") subCategory.isAvailable = isAvailable;
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 0b7272c99d18ba48276db212c7945dac92d79ab3
     if (categoryId) {
       const category = await Category.findById(categoryId);
-      if (!category)
-        return NextResponse.json(
-          { error: "القسم الرئيسي غير موجود" },
-          { status: 404 }
-        );
-      subCategory.categoryId = categoryId;
+      if (!category) {
+        return NextResponse.json({ error: "القسم الرئيسي غير موجود" }, { status: 404 });
+      }
     }
 
     await subCategory.save();
     return NextResponse.json(subCategory, { status: 200 });
-<<<<<<< HEAD
-
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
+  } catch (error) {
+    console.error("PATCH /subcategory error:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
-=======
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      return NextResponse.json(
-        { error: err.message || String(err) },
-        { status: 500 }
-      );
-    }
-    return NextResponse.json({ error: String(err) }, { status: 500 });
->>>>>>> 0b7272c99d18ba48276db212c7945dac92d79ab3
   }
 }
 
-export async function DELETE(req: Request) {
+/* --------------------------------------------
+   📍 DELETE — Remove subcategory & its dishes
+-------------------------------------------- */
+export async function DELETE(req: NextRequest): Promise<NextResponse> {
   try {
     await connectDB();
-    const body = await req.json();
-    const { id } = body;
+    const body = (await req.json()) ;
 
-    if (!id) return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });
-
-    const deleted = await SubCategory.findByIdAndDelete(id);
-    if (!deleted)
-      return NextResponse.json(
-        { error: "القسم الفرعي غير موجود" },
-        { status: 404 }
-      );
-
-    return NextResponse.json({ message: "تم الحذف بنجاح" }, { status: 200 });
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      return NextResponse.json(
-        { error: err.message || String(err) },
-        { status: 500 }
-      );
+    if (!body.id) {
+      return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });
     }
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+
+    const deletedSub = await SubCategory.findByIdAndDelete(body.id);
+    if (!deletedSub) {
+      return NextResponse.json({ error: "القسم الفرعي غير موجود" }, { status: 404 });
+    }
+
+    await Dish.deleteMany({ subCategoryId: body.id });
+
+    return NextResponse.json(
+      { message: "تم الحذف بنجاح مع الأطباق التابعة له" },
+      { status: 200 }
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

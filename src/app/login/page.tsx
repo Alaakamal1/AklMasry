@@ -19,7 +19,7 @@ export default function LoginPage() {
     if (res.ok) {
       router.push('/dashboard')
     } else {
-      alert('❌ كلمة السر غلط!')
+      alert(' كلمة السر غلط!')
     }
   }
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
     />
 
     <Button 
-      className="bg-[#4c3f2d] hover:bg-[#3a3123] w-full py-6 text-gray-50 text-lg rounded-xl transition-all duration-300"
+      className="bg-[#613829] hover:bg-[#563224] w-full py-6 text-gray-50 text-lg rounded-xl transition-all duration-300"
       type="submit"
     >
       دخول
