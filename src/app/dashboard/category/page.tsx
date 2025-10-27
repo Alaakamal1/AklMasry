@@ -44,7 +44,10 @@ async function fetchCategories() {
 
 
   useEffect(() => {
-    fetchCategories();
+    const loadData = () =>{
+      fetchCategories();
+    }
+    loadData();
   }, []);
 
   async function handleDelete(id: string) {

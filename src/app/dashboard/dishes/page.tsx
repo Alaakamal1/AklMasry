@@ -55,9 +55,12 @@ export default function DishesPage() {
   }
 
   useEffect(() => {
-    fetchDishes();
-    fetchCategories();
-    fetchSubcategories();
+    const loadData = async () => {
+      await fetchDishes();
+      await fetchCategories();
+      await fetchSubcategories();
+    };
+    loadData();
   }, []);
 
   // ============================ DELETE CONFIRMATION ============================
@@ -153,7 +156,7 @@ export default function DishesPage() {
               <SelectTrigger className="border rounded-lg px-2 py-2 text-sm sm:text-base w-full md:w-48 flex justify-between items-center">
                 <SelectValue placeholder="كل الأقسام" />
               </SelectTrigger>
-              <SelectContent className="bg-white" >
+              <SelectContent className="bg-white">
                 <SelectItem value="all">كل الأقسام</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat._id} value={cat._id}>
@@ -169,7 +172,7 @@ export default function DishesPage() {
               <SelectTrigger className="border rounded-lg px-2 py-2 text-sm sm:text-base w-full md:w-48 flex justify-between items-center">
                 <SelectValue placeholder="كل الأصناف" />
               </SelectTrigger>
-              <SelectContent className="bg-white" >
+              <SelectContent className="bg-white">
                 <SelectItem value="all">كل الأصناف</SelectItem>
                 {filteredSubcategories.map((sub) => (
                   <SelectItem key={sub._id} value={sub._id}>

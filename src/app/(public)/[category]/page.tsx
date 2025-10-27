@@ -49,7 +49,7 @@ export default function CategoryPage() {
           ...prev,
           [subCategoryId]: Array.isArray(data) ? data : data.dishes ?? [],
         }));
-      } catch (error) {
+      } catch{
         setDishes((prev) => ({ ...prev, [subCategoryId]: [] }));
       } finally {
         setLoadingDishes(null);

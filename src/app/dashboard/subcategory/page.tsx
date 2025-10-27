@@ -42,8 +42,11 @@ export default function SubcategoryPage(): JSX.Element {
   }
 
   useEffect(() => {
-    fetchSubcategories();
-    fetchCategories();
+    const loadData= async () =>{
+    await fetchSubcategories();
+    await fetchCategories();
+    }
+    loadData();
   }, []);
 
   async function handleConfirmDelete(): Promise<void> {
