@@ -10,12 +10,10 @@ import { Select, SelectTrigger } from "@radix-ui/react-select";
 import { SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { ChevronDown } from "lucide-react";
-
 interface ConfirmDialogState {
   open: boolean;
   target: ISubCategory | null;
 }
-
 export default function SubcategoryPage(): JSX.Element {
   const [subcategories, setSubcategories] = useState<ISubCategory[]>([]);
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -25,22 +23,18 @@ export default function SubcategoryPage(): JSX.Element {
     open: false,
     target: null,
   });
-
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState<string>("");
-
   async function fetchSubcategories(): Promise<void> {
     const res = await fetch("/api/subcategory");
     const data = await res.json();
     setSubcategories(data);
   }
-
   async function fetchCategories(): Promise<void> {
     const res = await fetch("/api/category");
     const data = await res.json();
     setCategories(data);
   }
-
   useEffect(() => {
     const loadData= async () =>{
     await fetchSubcategories();
@@ -48,7 +42,6 @@ export default function SubcategoryPage(): JSX.Element {
     }
     loadData();
   }, []);
-
   async function handleConfirmDelete(): Promise<void> {
     if (!confirmDialog.target) return;
     await fetch(`/api/subcategory`, {
@@ -98,7 +91,6 @@ export default function SubcategoryPage(): JSX.Element {
                 ))}
               </SelectContent>
             </Select>
-
             <Input
               type="text"
               placeholder="ابحث عن صنف..."
@@ -107,7 +99,6 @@ export default function SubcategoryPage(): JSX.Element {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-
           <Button
             onClick={() => {
               setEditingSub(null);
@@ -118,7 +109,6 @@ export default function SubcategoryPage(): JSX.Element {
             إضافة صنف فرعي
           </Button>
         </div>
-
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse text-sm sm:text-base">
             <thead>

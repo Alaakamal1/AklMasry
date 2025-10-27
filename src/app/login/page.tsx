@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import toast from 'react-hot-toast'
 
 export default function LoginPage() {
   const [password, setPassword] = useState('')
@@ -19,7 +20,7 @@ export default function LoginPage() {
     if (res.ok) {
       router.push('/dashboard')
     } else {
-      alert(' كلمة السر غلط!')
+      toast.error(' كلمة السر غلط!')
     }
   }
 

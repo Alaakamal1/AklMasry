@@ -10,14 +10,11 @@ export default function CategoryPage() {
   const searchParams = useSearchParams();
   const categoryId = searchParams.get("id");
   const categoryName = searchParams.get("name");
-
   const [subCategories, setSubCategories] = useState<ISubCategory[]>([]);
   const [dishes, setDishes] = useState<Record<string, IDish[]>>({});
   const [openSubCategory, setOpenSubCategory] = useState<string | null>(null);
   const [loadingSubCategories, setLoadingSubCategories] = useState(true);
   const [loadingDishes, setLoadingDishes] = useState<string | null>(null);
-
-  // جلب SubCategories
   useEffect(() => {
     if (!categoryId) return;
     setLoadingSubCategories(true);
@@ -32,7 +29,6 @@ export default function CategoryPage() {
       .finally(() => setLoadingSubCategories(false));
   }, [categoryId]);
 
-  // تبديل SubCategory وعرض الأطباق
   const toggleSubCategory = async (subCategoryId: string) => {
     if (openSubCategory === subCategoryId) {
       setOpenSubCategory(null);

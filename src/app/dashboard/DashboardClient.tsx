@@ -6,7 +6,6 @@ import CategoriesPage from "./category/page";
 import SubcategoryPage from "./subcategory/page";
 import DishesPage from "./dishes/page";
 import toast, { Toaster } from "react-hot-toast";
-
 interface Props {
   user: {
     id: string;
@@ -14,20 +13,16 @@ interface Props {
     role: string;
   };
 }
-
 export default function DashboardClient({ user }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-
   const handleLogout = async () => {
     try {
       setLoading(true);
-
       const res = await fetch("/api/logout", {
         method: "POST",
         credentials: "include",
       });
-
       if (res.ok) {
         setTimeout(() => router.push("/"), 1000);
       } else {
@@ -40,7 +35,6 @@ export default function DashboardClient({ user }: Props) {
       setLoading(false);
     }
   };
-
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />

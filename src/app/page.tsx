@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import Home from "./(public)/page";
+import Home from "./home/page";
 export default async function Main() {
   await connectDB();
 

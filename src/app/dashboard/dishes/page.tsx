@@ -22,11 +22,9 @@ export default function DishesPage() {
   const [subcategories, setSubcategories] = useState<ISubCategory[]>([]);
   const [editingDish, setEditingDish] = useState<IDish | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedSub, setSelectedSub] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
-
   const [deleteModal, setDeleteModal] = useState<{
     open: boolean;
     id: string | null;
@@ -41,7 +39,6 @@ export default function DishesPage() {
     const data: IDish[] = await res.json();
     setDishes(data);
   }
-
   async function fetchCategories() {
     const res = await fetch("/api/category");
     const data: ICategory[] = await res.json();
@@ -287,7 +284,6 @@ export default function DishesPage() {
         </div>
       )}
 
-      {/* ✅ Add/Edit Modal */}
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-2 sm:p-0">
           <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 w-full max-w-lg relative">

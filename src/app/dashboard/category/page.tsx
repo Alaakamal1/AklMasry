@@ -4,11 +4,9 @@ import CategoryForm from "../../../components/CategoryForm";
 import { ICategory } from "@/models/Category";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
-
 interface ICategoryWithCount extends ICategory {
   subCount?: number;
 }
-
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<ICategoryWithCount[]>([]);
   const [open, setOpen] = useState(false);
@@ -16,37 +14,31 @@ export default function CategoriesPage() {
     null
   );
   const [loading, setLoading] = useState(true);
-
-async function fetchCategories() {
-  setLoading(true);
-  try {
-    const res = await fetch("/api/category");
-    if (!res.ok) {
-      throw new Error("Failed to fetch categories");
+  async function fetchCategories() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/category");
+      if (!res.ok) {
+        throw new Error("Failed to fetch categories");
+      }
+      const data = await res.json();
+      const categoriesWithCount = data.map((cat: ICategoryWithCount) => ({
+        ...cat,
+        createdAt: new Date(cat.createdAt),
+        updatedAt: new Date(cat.updatedAt),
+      }));
+      setCategories(categoriesWithCount);
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+      toast.error("حدث خطأ أثناء تحميل الأقسام", { duration: 2000 });
+    } finally {
+      setLoading(false);
     }
-
-    const data = await res.json();
-
-    const categoriesWithCount = data.map((cat: ICategoryWithCount) => ({
-      ...cat,
-      createdAt: new Date(cat.createdAt),
-      updatedAt: new Date(cat.updatedAt),
-    }));
-
-    setCategories(categoriesWithCount);
-  } catch (err) {
-    console.error("Error fetching categories:", err);
-    toast.error("حدث خطأ أثناء تحميل الأقسام", { duration: 2000 });
-  } finally {
-    setLoading(false);
   }
-}
-
-
   useEffect(() => {
-    const loadData = () =>{
+    const loadData = () => {
       fetchCategories();
-    }
+    };
     loadData();
   }, []);
 
@@ -99,10 +91,8 @@ async function fetchCategories() {
     setEditingCategory(cat);
     setOpen(true);
   }
-
   return (
     <div className="p-6 space-y-6 ">
-      {/* الجدول */}
       <div className="bg-white shadow rounded-xl p-4 mt-4">
         <div className="flex justify-between pb-2 max-sm:flex-col">
           <h2 className="text-lg font-bold mb-4 sm:text-xl max-sm:text-center">
@@ -149,18 +139,18 @@ async function fetchCategories() {
                     </td>
                     <td className="p-3 border text-center">
                       <div className="flex flex-col md:flex-row justify-center gap-2">
-                      <Button
-                        onClick={() => handleEdit(cat)}
-                        className="border bg-green-600 text-white px-3 py-1 rounded w-full md:w-auto"
-                      >
-                        تعديل
-                      </Button>
-                      <Button
-                        onClick={() => handleDelete(cat._id)}
-                        className="border text-red-600 px-3 py-1 rounded w-full md:w-auto"
-                      >
-                        حذف
-                      </Button>
+                        <Button
+                          onClick={() => handleEdit(cat)}
+                          className="border bg-green-600 text-white px-3 py-1 rounded w-full md:w-auto"
+                        >
+                          تعديل
+                        </Button>
+                        <Button
+                          onClick={() => handleDelete(cat._id)}
+                          className="border text-red-600 px-3 py-1 rounded w-full md:w-auto"
+                        >
+                          حذف
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -175,12 +165,9 @@ async function fetchCategories() {
           </tbody>
         </table>
       </div>
-
-      {/* المودال */}
       {open && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg relative">
-  
             <CategoryForm
               initialData={editingCategory}
               onClose={() => setOpen(false)}

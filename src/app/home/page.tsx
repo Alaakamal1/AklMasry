@@ -30,7 +30,7 @@ export default async function Home() {
             : CategoryModel.map((cat) => (
                 <Link
                   key={cat._id.toString()}
-                  href={`/category?id=${cat._id.toString()}&name=${encodeURIComponent(
+                  href={`home/category?id=${cat._id.toString()}&name=${encodeURIComponent(
                     cat.categoryName
                   )}`}
                   className="p-6 bg-[#613829] rounded-2xl shadow hover:shadow-lg text-center"
