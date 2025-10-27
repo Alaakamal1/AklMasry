@@ -5,8 +5,6 @@ import Link from "next/link";
 
 export default async function Home() {
   await connectDB();
-
-  // جلب الأقسام وتحويل النوع بطريقة آمنة
   const CategoryModel = (await Category.find().lean()) as unknown as ICategory[];
 
   const isLoading = CategoryModel.length === 0;
