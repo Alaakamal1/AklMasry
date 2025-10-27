@@ -1,25 +1,12 @@
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import Category from "@/models/Category";
 import SubCategory, { ISubCategory } from "@/models/SubCategory";
 import Dish from "@/models/Dish";
-
-async function saveFileToUploads(file: File, folder: string): Promise<string> {
-  const uploadDir = path.join(process.cwd(), `public/uploads/${folder}`);
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const filename = `${Date.now()}-${file.name}`;
-  const filePath = path.join(uploadDir, filename);
-  fs.writeFileSync(filePath, buffer);
-
-  return `/uploads/${folder}/${filename}`;
-}
+import { uploadToCloudinary } from "@/lib/uploadImage";
 
 export async function GET(): Promise<NextResponse> {
   try {
@@ -41,8 +28,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     await connectDB();
     const contentType = req.headers.get("content-type") || "";
-
-    // 🟩 في حالة multipart/form-data (رفع صورة)
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();
       const subCategoryName = formData.get("subCategoryName") as string | null;
@@ -66,7 +51,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
       let imagePath = "";
       if (file && file.size > 0) {
-        imagePath = await saveFileToUploads(file, "subcategories");
+        imagePath = await uploadToCloudinary(file);
       }
 
       // ✅ تأكيد أن الـ categoryId هو string أو ObjectId فقط
@@ -148,22 +133,29 @@ export async function PATCH(req: NextRequest): Promise<NextResponse> {
 
       const subCategory = await SubCategory.findById(id);
       if (!subCategory) {
-        return NextResponse.json({ error: "القسم الفرعي غير موجود" }, { status: 404 });
+        return NextResponse.json(
+          { error: "القسم الفرعي غير موجود" },
+          { status: 404 }
+        );
       }
 
       if (subCategoryName) subCategory.subCategoryName = subCategoryName;
-      if (isAvailable !== null) subCategory.isAvailable = isAvailable === "true";
+      if (isAvailable !== null)
+        subCategory.isAvailable = isAvailable === "true";
 
       if (categoryId) {
         const category = await Category.findById(categoryId);
         if (!category) {
-          return NextResponse.json({ error: "القسم الرئيسي غير موجود" }, { status: 404 });
+          return NextResponse.json(
+            { error: "القسم الرئيسي غير موجود" },
+            { status: 404 }
+          );
         }
         subCategory.categoryId = new mongoose.Types.ObjectId(categoryId);
       }
 
       if (file && file.size > 0) {
-        subCategory.image = await saveFileToUploads(file, "subcategories");
+        subCategory.image = await uploadToCloudinary(file);
       }
 
       await subCategory.save();
@@ -178,7 +170,10 @@ export async function PATCH(req: NextRequest): Promise<NextResponse> {
 
     const subCategory = await SubCategory.findById(id);
     if (!subCategory) {
-      return NextResponse.json({ error: "القسم الفرعي غير موجود" }, { status: 404 });
+      return NextResponse.json(
+        { error: "القسم الفرعي غير موجود" },
+        { status: 404 }
+      );
     }
 
     if (subCategoryName) subCategory.subCategoryName = subCategoryName;
@@ -187,7 +182,10 @@ export async function PATCH(req: NextRequest): Promise<NextResponse> {
     if (categoryId) {
       const category = await Category.findById(categoryId);
       if (!category) {
-        return NextResponse.json({ error: "القسم الرئيسي غير موجود" }, { status: 404 });
+        return NextResponse.json(
+          { error: "القسم الرئيسي غير موجود" },
+          { status: 404 }
+        );
       }
     }
 
@@ -206,7 +204,7 @@ export async function PATCH(req: NextRequest): Promise<NextResponse> {
 export async function DELETE(req: NextRequest): Promise<NextResponse> {
   try {
     await connectDB();
-    const body = (await req.json()) ;
+    const body = await req.json();
 
     if (!body.id) {
       return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });
@@ -214,7 +212,10 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
 
     const deletedSub = await SubCategory.findByIdAndDelete(body.id);
     if (!deletedSub) {
-      return NextResponse.json({ error: "القسم الفرعي غير موجود" }, { status: 404 });
+      return NextResponse.json(
+        { error: "القسم الفرعي غير موجود" },
+        { status: 404 }
+      );
     }
 
     await Dish.deleteMany({ subCategoryId: body.id });

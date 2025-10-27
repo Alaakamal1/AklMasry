@@ -49,9 +49,6 @@ export default function CategoryForm({
         throw new Error(err?.error ?? "حدث خطأ");
       }
 
-      toast.success(
-        initialData ? "تم تعديل القسم بنجاح" : "تم إضافة القسم بنجاح"
-      );
       setCategoryName("");
       onSuccess();
       onClose();
@@ -81,14 +78,14 @@ export default function CategoryForm({
       <div className="flex gap-2">
         <Button
           type="submit"
-          className="bg-green-600 text-white w-full max-w-xs px-4 py-2 rounded"
+          className="bg-green-600 text-white sm:w-55 max-sm:w-27 px-4 py-2 rounded"
         >
           حفظ
         </Button>
         <Button
           type="button"
           onClick={onClose}
-          className="bg-gray-300 text-black w-full max-w-xs px-4 py-2 rounded"
+          className="bg-gray-300 text-black sm:w-55 max-sm:w-27 px-4 py-2 rounded"
         >
           إلغاء
         </Button>

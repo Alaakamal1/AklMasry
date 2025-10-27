@@ -33,8 +33,6 @@ export default function DishForm({ onClose, onSuccess, initialData }: DishFormPr
       : initialData?.subCategoryId?._id ?? ""
   );
   const [loadingSubs, setLoadingSubs] = useState<boolean>(false);
-
-  // جلب الأقسام الرئيسية
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -49,8 +47,6 @@ export default function DishForm({ onClose, onSuccess, initialData }: DishFormPr
     };
     fetchCategories();
   }, []);
-
-  // تعبئة القسم الرئيسي عند التعديل
   useEffect(() => {
     if (!categories.length || !initialData?.subCategoryId) return;
 
@@ -60,8 +56,6 @@ export default function DishForm({ onClose, onSuccess, initialData }: DishFormPr
       if (catId) setSelectedCategory(catId.toString());
     }
   }, [categories, initialData]);
-
-  // جلب الأقسام الفرعية عند اختيار قسم رئيسي
   useEffect(() => {
     const categoryToFetch =
       selectedCategory ||
@@ -82,8 +76,6 @@ export default function DishForm({ onClose, onSuccess, initialData }: DishFormPr
         if (!res.ok) throw new Error("خطأ أثناء جلب الأقسام الفرعية");
         const data: ISubCategory[] = await res.json();
         setSubCategories(data);
-
-        // تعبئة القسم الفرعي تلقائياً عند التعديل
         if (initialData?.subCategoryId && !selectedSubCategory) {
           setSelectedSubCategory(
             typeof initialData.subCategoryId === "object"
@@ -99,19 +91,16 @@ export default function DishForm({ onClose, onSuccess, initialData }: DishFormPr
         setLoadingSubs(false);
       }
     };
-
     fetchSubs();
   }, [selectedCategory, initialData, selectedSubCategory]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     const payload = {
       dishName,
       price: Number(price),
       subCategoryId: selectedSubCategory,
     };
-
     try {
       const res = await fetch("/api/dishes", {
         method: initialData ? "PATCH" : "POST",
@@ -120,19 +109,14 @@ export default function DishForm({ onClose, onSuccess, initialData }: DishFormPr
           ? JSON.stringify({ id: initialData._id, ...payload })
           : JSON.stringify(payload),
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         toast.error(data.error || "حدث خطأ أثناء الحفظ");
         return;
       }
-
-      toast.success(initialData ? "تم تعديل الطبق" : "تم إضافة الطبق");
       onSuccess();
       onClose();
-    } catch (error) {
-      console.error(error);
+    } catch{
       toast.error("تعذر الاتصال بالسيرفر");
     }
   };
@@ -210,10 +194,10 @@ export default function DishForm({ onClose, onSuccess, initialData }: DishFormPr
       </Select>
 
       <div className="flex gap-5">
-        <Button type="submit" className="bg-green-600 text-white px-4 py-2 max-sm:w-1/3 md:w-52 rounded">
+        <Button type="submit" className="bg-green-600 text-white px-4 py-2 max-sm:w-27 sm:w-52 rounded">
           {initialData ? "حفظ التعديلات" : "حفظ"}
         </Button>
-        <Button type="button" onClick={onClose} className="bg-gray-300 md:w-52 max-sm:w-1/3 px-4 py-2 rounded">
+        <Button type="button" onClick={onClose} className="bg-gray-300 max-sm:w-27 px-4 py-2 sm:w-52 rounded">
           إلغاء
         </Button>
       </div>

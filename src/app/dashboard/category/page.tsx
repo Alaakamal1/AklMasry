@@ -118,36 +118,38 @@ export default function CategoriesPage() {
               ? [...Array(3)].map((_, i) => (
                   <tr key={i}>
                     <td className="p-2 border text-center">
-                      <div className="h-4 bg-gray-200 animate-pulse rounded w-32"></div>
+                      <div className="h-4 bg-gray-200 animate-pulse rounded w-3/4 mx-auto sm:w-1/2"></div>
                     </td>
                     <td className="p-2 border text-center">
-                      <div className="h-4 bg-gray-200 animate-pulse rounded w-12 mx-auto"></div>
+                      <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3 mx-auto"></div>
                     </td>
                     <td className="p-2 border text-center">
-                      <div className="flex gap-2 justify-center">
-                        <div className="h-8 w-16 bg-gray-200 animate-pulse rounded"></div>
-                        <div className="h-8 w-16 bg-gray-200 animate-pulse rounded"></div>
+                      <div className="flex flex-col sm:flex-row gap-2 justify-center items-center">
+                        <div className="h-8 w-24 sm:w-20 bg-gray-200 animate-pulse rounded"></div>
+                        <div className="h-8 w-24 sm:w-20 bg-gray-200 animate-pulse rounded"></div>
                       </div>
                     </td>
                   </tr>
                 ))
               : categories.map((cat) => (
-                  <tr key={cat._id} className="hover:bg-gray-50">
-                    <td className="p-2 border">{cat.categoryName}</td>
-                    <td className="p-2 border text-center">
+                  <tr key={cat._id} className="hover:bg-gray-50 text-center">
+                    <td className="p-2 border text-sm sm:text-base">
+                      {cat.categoryName}
+                    </td>
+                    <td className="p-2 border text-sm sm:text-base">
                       {cat.subCount ?? 0}
                     </td>
-                    <td className="p-3 border text-center">
-                      <div className="flex flex-col md:flex-row justify-center gap-2">
+                    <td className="p-3 border">
+                      <div className="flex flex-col sm:flex-row justify-center gap-2">
                         <Button
                           onClick={() => handleEdit(cat)}
-                          className="border bg-green-600 text-white px-3 py-1 rounded w-full md:w-auto"
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded w-full sm:w-auto"
                         >
                           تعديل
                         </Button>
                         <Button
                           onClick={() => handleDelete(cat._id)}
-                          className="border text-red-600 px-3 py-1 rounded w-full md:w-auto"
+                          className="border text-red-600 px-3 py-1 rounded w-full sm:w-auto"
                         >
                           حذف
                         </Button>

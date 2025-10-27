@@ -59,12 +59,10 @@ export default function SubCategoryForm({
         toast.error(data.error || "حدث خطأ أثناء العملية");
         return;
       }
-
       onSuccess();
       onClose();
-    } catch (error) {
+    } catch{
       toast.error("حدث خطأ أثناء العملية");
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -137,7 +135,7 @@ export default function SubCategoryForm({
       <div className="flex gap-2 justify-between">
         <Button
           type="submit"
-          className="bg-green-600 text-white sm:w-55 px-4 py-2  max-sm:w-37  rounded"
+          className="bg-green-600 text-white sm:w-55 px-4 py-2  max-sm:w-25  rounded"
           disabled={loading}
         >
           حفظ
@@ -145,7 +143,7 @@ export default function SubCategoryForm({
         <Button
           type="button"
           onClick={onClose}
-          className="bg-gray-300 px-4 py-2 sm:w-55  max-sm:w-37  rounded"
+          className="bg-gray-300 px-4 py-2 sm:w-55  max-sm:w-25  rounded"
         >
           إلغاء
         </Button>
