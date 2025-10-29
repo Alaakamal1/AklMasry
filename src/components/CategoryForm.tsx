@@ -32,15 +32,13 @@ export default function CategoryForm({
     }
 
     try {
-      const method = initialData ? "PUT" : "POST";
+      const method = initialData ? "PATCH" : "POST";
       const id = initialData?._id;
-
-      const res = await fetch(
-        initialData ? `/api/category?id=${id}` : "/api/category",
+      const res = await fetch( "/api/category",
         {
           method,
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ categoryName }),
+          body: JSON.stringify({id, categoryName }),
         }
       );
 
@@ -78,14 +76,14 @@ export default function CategoryForm({
       <div className="flex gap-2">
         <Button
           type="submit"
-          className="bg-green-600 text-white sm:w-55 max-sm:w-27 px-4 py-2 rounded"
+          className="bg-green-600 text-white sm:w-55 max-sm:w-27 lg:w-57 px-4 py-2 rounded"
         >
           حفظ
         </Button>
         <Button
           type="button"
           onClick={onClose}
-          className="bg-gray-300 text-black sm:w-55 max-sm:w-27 px-4 py-2 rounded"
+          className="bg-gray-300 text-black sm:w-55 max-sm:w-27 lg:w-57 px-4 py-2 rounded"
         >
           إلغاء
         </Button>

@@ -5,7 +5,7 @@ import SubCategoryForm from "../../../components/SubCategoryForm";
 import { Button } from "@/components/ui/button";
 import { ISubCategory } from "@/models/SubCategory";
 import { ICategory } from "@/models/Category";
-import toast, { Toaster } from "react-hot-toast";
+import  { Toaster } from "react-hot-toast";
 import { Select, SelectTrigger } from "@radix-ui/react-select";
 import { SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -185,7 +185,6 @@ export default function SubcategoryPage(): JSX.Element {
               onSuccess={() => {
                 fetchSubcategories();
                 setOpenForm(false);
-                toast.success(" تم الحفظ بنجاح", { position: "top-center" });
               }}
             />
           </div>

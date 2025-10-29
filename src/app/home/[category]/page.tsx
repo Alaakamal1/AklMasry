@@ -96,6 +96,7 @@ export default function CategoryPage() {
                           fill
                           className="object-cover"
                           priority
+                          unoptimized
                         />
                       </div>
                     )}
